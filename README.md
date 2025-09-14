@@ -1,6 +1,7 @@
 <!-- markdownlint-disable first-line-h1 -->
 [![Test](https://github.com/yukihiko-shinoda/dockerfile-claude-code-python-development/actions/workflows/test.yml/badge.svg)](https://github.com/yukihiko-shinoda/dockerfile-claude-code-python-development/actions/workflows/test.yml)
 [![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/futureys/claude-code-python-development)](https://hub.docker.com/r/futureys/claude-code-python-development/dockerfile)
+[![Dependabot](https://flat.badgen.net/github/dependabot/yukihiko-shinoda/dockerfile-claude-code-python-development?icon=dependabot)](https://github.com/yukihiko-shinoda/dockerfile-claude-code-python-development/security/dependabot)
 
 # Quick reference
 
