@@ -1,0 +1,7 @@
+services:
+  claude-code-python:
+    command:
+      - hello_world.py
+    entrypoint:
+      - uv
+      - run

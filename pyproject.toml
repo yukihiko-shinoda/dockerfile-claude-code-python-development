@@ -1,0 +1,4 @@
+# For testing
+[project]
+name = "claude-code-python"
+version = "0.1.0"

@@ -1,0 +1,20 @@
+services:
+  claude-code-python:
+    build:
+      args:
+        DOCKER_IMAGE_TAG_NODE: ${DOCKER_IMAGE_TAG_NODE:?err}
+        VERSION_CLAUDE_CODE: ${VERSION_CLAUDE_CODE:?err}
+        VERSION_UV: ${VERSION_UV:?err}
+      context: .
+    entrypoint:
+      - /bin/bash
+    image: futureys/claude-code-python:development
+    user: root
+    volumes:
+      - .:/workspace
+      - /workspace/.venv
+      # - Using uv in Docker | uv
+      #   https://docs.astral.sh/uv/guides/integration/docker/#caching
+      - uv-cache:/root/.cache/uv
+volumes:
+  uv-cache:
