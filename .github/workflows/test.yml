@@ -17,7 +17,7 @@ jobs:
         with:
           username: ${{ vars.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: set-tag
         run: echo "DOCKER_TAG=test" >> $GITHUB_ENV
       - name: Import environment variables from a file
@@ -26,5 +26,5 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           targets: app-release
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: docker compose -f compose.yml -f compose.test.yml run --rm claude-code-python
