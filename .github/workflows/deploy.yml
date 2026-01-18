@@ -17,7 +17,7 @@ jobs:
         run: echo "DOCKER_TAG=$(echo ${GITHUB_REF#refs/tags/v})" >> $GITHUB_ENV
       - uses: actions/checkout@v6
       - name: Import environment variables from a file
-        run: cat .env >> $GITHUB_ENV
+        run: cat .env | grep -v '^#' >> $GITHUB_ENV
       - uses: docker/bake-action@v6
         with:
           push: true

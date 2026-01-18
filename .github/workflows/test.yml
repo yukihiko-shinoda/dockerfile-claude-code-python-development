@@ -21,7 +21,7 @@ jobs:
       - id: set-tag
         run: echo "DOCKER_TAG=test" >> $GITHUB_ENV
       - name: Import environment variables from a file
-        run: cat .env >> $GITHUB_ENV
+        run: cat .env | grep -v '^#' >> $GITHUB_ENV
       - uses: docker/bake-action@v6
         with:
           builder: ${{ steps.buildx.outputs.name }}
