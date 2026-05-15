@@ -2,9 +2,8 @@ services:
   claude-code-python:
     build:
       args:
-        DOCKER_IMAGE_TAG_NODE: ${DOCKER_IMAGE_TAG_NODE:?err}
         VERSION_CLAUDE_CODE: ${VERSION_CLAUDE_CODE:?err}
-        VERSION_UV: ${VERSION_UV:?err}
+        DOCKER_IMAGE_TAG_UV: ${DOCKER_IMAGE_TAG_UV:?err}
       context: .
     entrypoint:
       - /bin/bash
