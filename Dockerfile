@@ -22,10 +22,32 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
  && rm -rf /var/lib/apt/lists/*
 # Claude Code
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl -fsSL https://claude.ai/install.sh | bash -s "${VERSION_CLAUDE_CODE}"
 # - Troubleshoot installation and login - Claude Code Docs
 #   https://code.claude.com/docs/en/troubleshoot-install#verify-your-path
+# This setting should be set before running the installation script, otherwise installation may fail with the following error:
+#   56.76 ⚠ Setup notes:
+#   56.76   ● Native installation exists but ~/.local/bin is not in your PATH. Run:
+#   56.76 
+#   56.76     echo 'export PATH="$HOME/.local/bin:$PATH"' >> your shell config file && source your shell config file
+#   58.77 
+#   58.77 ✔ Claude Code successfully installed!
+#   58.77 
+#   58.77   Version: 2.1.197
+#   58.77 
+#   58.77   Location: ~/.local/bin/claude
+#   58.77 
+#   58.77 
+#   58.77   Next: Run claude --help to get started
+#   58.77 
+#   58.77 ⚠ Setup notes:
+#   58.77   ● Native installation exists but ~/.local/bin is not in your PATH. Run:
+#   58.77 
+#   58.77     echo 'export PATH="$HOME/.local/bin:$PATH"' >> your shell config file && source your shell config file
+#   60.79 
+#   60.82 
+#   60.82 ✅ Installation complete!
 ENV PATH="/root/.local/bin:${PATH}"
+RUN curl -fsSL https://claude.ai/install.sh | bash -s "${VERSION_CLAUDE_CODE}"
 ENV DISABLE_AUTOUPDATER=1
 ENTRYPOINT [ "uv", "run" ]
 CMD ["pytest"]
