@@ -23,6 +23,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # Claude Code
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://claude.ai/install.sh | bash -s "${VERSION_CLAUDE_CODE}"
+# - Troubleshoot installation and login - Claude Code Docs
+#   https://code.claude.com/docs/en/troubleshoot-install#verify-your-path
+ENV PATH="/root/.local/bin:${PATH}"
 ENV DISABLE_AUTOUPDATER=1
 ENTRYPOINT [ "uv", "run" ]
 CMD ["pytest"]
