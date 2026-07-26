@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+git secrets --pre_commit_hook -- "$@"
+gitleaks git --pre-commit --staged --redact --verbose .
+source "$(dirname "$0")/_local-hook-exec"

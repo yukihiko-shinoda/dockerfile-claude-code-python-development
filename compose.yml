@@ -3,10 +3,10 @@ services:
     build:
       args:
         VERSION_CLAUDE_CODE: ${VERSION_CLAUDE_CODE:?err}
+        VERSION_GIT_SECRETS: ${VERSION_GIT_SECRETS:?err}
+        VERSION_GITLEAKS: ${VERSION_GITLEAKS:?err}
         DOCKER_IMAGE_TAG_UV: ${DOCKER_IMAGE_TAG_UV:?err}
       context: .
-    entrypoint:
-      - /bin/bash
     image: futureys/claude-code-python:development
     user: root
     volumes:

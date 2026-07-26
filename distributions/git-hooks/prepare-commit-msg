@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+git secrets --prepare_commit_msg_hook -- "$@"
+source "$(dirname "$0")/_local-hook-exec"
