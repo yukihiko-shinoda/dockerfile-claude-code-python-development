@@ -19,6 +19,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     ca-certificates/stable \
     # To install Claude Code
     curl/stable \
+    # To enable Claude Code sandbox
+    # - Configure the sandboxed Bash tool - Claude Code Docs
+    #   https://code.claude.com/docs/en/sandboxing#set-up-linux-and-wsl2
+    bubblewrap/stable \
+    socat/stable \
     # To interact with GitHub repositories
     git/stable \
     # To install git-secrets
