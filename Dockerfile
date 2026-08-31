@@ -1,7 +1,10 @@
 ARG DOCKER_IMAGE_TAG_UV=debian-slim
 FROM ghcr.io/astral-sh/uv:${DOCKER_IMAGE_TAG_UV} AS uv
 ARG VERSION_CLAUDE_CODE
+# Reason: This is not secret but tool name includes the word:`secrets`
+# hadolint ignore=DL3064
 ARG VERSION_GIT_SECRETS
+ARG VERSION_HOL_GUARD
 ARG VERSION_GITLEAKS
 WORKDIR /workspace
 # - Using uv in Docker | uv
@@ -28,6 +31,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     wget/stable \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+# HOL Guard: runtime protection for AI agents, watching this container's claude-code
+# harness for secret exposure, prompt injection, unsafe commands, and malicious packages.
+# PyPI: https://pypi.org/project/hol-guard/
+# NOTE: version bump is manual, same as csklint above -- not tracked by Dependabot
+RUN uv tool install "hol-guard==${VERSION_HOL_GUARD}" \
+ && hol-guard install claude-code
 # Claude Code
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # - Troubleshoot installation and login - Claude Code Docs
