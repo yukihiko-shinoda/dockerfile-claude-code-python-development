@@ -41,7 +41,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # PyPI: https://pypi.org/project/hol-guard/
 # NOTE: version bump is manual, same as csklint above -- not tracked by Dependabot
 RUN uv tool install "hol-guard==${VERSION_HOL_GUARD}" \
- && hol-guard install claude-code
+ && hol-guard install claude-code \
+ && hol-guard settings set protection watch
 # Claude Code
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # - Troubleshoot installation and login - Claude Code Docs
