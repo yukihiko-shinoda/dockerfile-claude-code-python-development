@@ -18,7 +18,7 @@ services:
         #   https://github.com/hol-guard/hol-guard/releases
         VERSION_HOL_GUARD: 3.0.31
       context: .
-    image: futureys/claude-code-python:development
+    image: futureys/claude-code-python-development:development
     user: root
     volumes:
       - .:/workspace
