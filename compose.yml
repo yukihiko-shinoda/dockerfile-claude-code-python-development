@@ -4,7 +4,7 @@ services:
       args:
         # - uv versions · astral-sh
         #   https://github.com/astral-sh/uv/pkgs/container/uv/versions?filters%5Bversion_type%5D=tagged
-        DOCKER_IMAGE_TAG_UV: 0.12.7-trixie-slim
+        DOCKER_IMAGE_TAG_UV: 0.12.13-trixie-slim
         # - @anthropic-ai/claude-code - npm
         #   https://www.npmjs.com/package/@anthropic-ai/claude-code?activeTab=versions
         VERSION_CLAUDE_CODE: 2.1.236
@@ -14,9 +14,9 @@ services:
         # - Releases · gitleaks/gitleaks
         #   https://github.com/gitleaks/gitleaks/releases
         VERSION_GITLEAKS: 8.30.1
-        # - Releases · hol-guard/hol-guard
-        #   https://github.com/hol-guard/hol-guard/releases
-        VERSION_HOL_GUARD: 3.0.31
+        # - Releases · hashgraph-online/hol-guard
+        #   https://github.com/hashgraph-online/hol-guard/releases
+        VERSION_HOL_GUARD: 3.0.146
       context: .
     image: futureys/claude-code-python-development:development
     user: root
