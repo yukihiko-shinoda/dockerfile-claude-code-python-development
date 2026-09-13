@@ -36,6 +36,15 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     wget/stable \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+# git credential source for github.com HTTPS operations: reads the
+# git_auth_secret Docker secret (compose.yml), mounted at
+# /opt/claude-agent-secrets/git_auth_token like the AWS/GCP secrets above,
+# instead of relying solely on VS Code Dev Containers' own git config
+# forwarding from the host -- see git-agent-credential-helper.sh for why
+# this coexists with, rather than replaces, that forwarding.
+COPY ./distributions/git-agent-credential-helper.sh /usr/local/bin/git-agent-credential-helper
+RUN chmod +x /usr/local/bin/git-agent-credential-helper \
+ && git config --system credential.https://github.com.helper /usr/local/bin/git-agent-credential-helper
 # HOL Guard: runtime protection for AI agents, watching this container's claude-code
 # harness for secret exposure, prompt injection, unsafe commands, and malicious packages.
 # PyPI: https://pypi.org/project/hol-guard/
