@@ -16,7 +16,13 @@ services:
         VERSION_GITLEAKS: 8.30.1
         # - Releases · hashgraph-online/hol-guard
         #   https://github.com/hashgraph-online/hol-guard/releases
-        VERSION_HOL_GUARD: 3.0.162
+        VERSION_HOL_GUARD: 3.0.189
+        # - Cloud SDK release notes  |  Google Cloud CLI Documentation
+        #   https://cloud.google.com/sdk/docs/release-notes
+        GCLOUD_VERSION: 585.0.0
+        # - Releases · googleworkspace/cli
+        #   https://github.com/googleworkspace/cli/releases
+        GWS_VERSION: 0.22.5
       context: .
     image: futureys/claude-code-python-development:development
     user: root
