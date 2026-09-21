@@ -36,12 +36,24 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     wget/stable \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+# Force the Claude Code sandbox on for every session in this container:
+# managed settings take precedence over user/project settings and cannot be
+# overridden from inside a session.
+# - Enterprise sandbox settings and managed policy settings - Claude Code Docs
+#   https://code.claude.com/docs/en/sandboxing#enterprise-sandbox-settings
+#   https://code.claude.com/docs/en/settings#managed-settings
+# Source: https://github.com/yukihiko-shinoda/claude-code-settings-file/blob/main/managed-settings.json
+# Pinned to a commit SHA so the policy cannot change under us; bump manually.
+# ADD creates /etc/claude-code automatically; remote files default to mode 0600, so set 0644 explicitly.
+ADD --chmod=0644 https://raw.githubusercontent.com/yukihiko-shinoda/claude-code-settings-file/05970207b46204d4c67988a8ec14fb77a9e5fb24/managed-settings.json /etc/claude-code/managed-settings.json
 # git credential source for github.com HTTPS operations: reads the
-# git_auth_secret Docker secret (compose.yml), mounted at
-# /opt/claude-agent-secrets/git_auth_token like the AWS/GCP secrets above,
+# GIT_AUTH_TOKEN Docker secret, mounted at /run/secrets/GIT_AUTH_TOKEN,
 # instead of relying solely on VS Code Dev Containers' own git config
 # forwarding from the host -- see git-agent-credential-helper.sh for why
 # this coexists with, rather than replaces, that forwarding.
+# NOTE: only usable outside Claude Code's sandbox; authenticated git commands
+# run by Claude Code itself are not supported yet:
+# https://github.com/anthropics/claude-code/issues/95752
 COPY ./distributions/git-agent-credential-helper.sh /usr/local/bin/git-agent-credential-helper
 RUN chmod +x /usr/local/bin/git-agent-credential-helper \
  && git config --system credential.https://github.com.helper /usr/local/bin/git-agent-credential-helper
