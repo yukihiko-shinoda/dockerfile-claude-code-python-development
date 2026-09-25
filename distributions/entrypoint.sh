@@ -7,12 +7,19 @@ for pyproject in /workspace/*/pyproject.toml; do
     project=$(basename "$dir")
     venv_path="$dir/.venv"
     target="/workspace/venvs/$project"
+    # Use a relative link target instead of the absolute $target.
+    # When a path under .venv is denied (Claude Code permissions.deny), bwrap has to create
+    # a mount point for it. If .venv is an absolute symlink, bwrap can't resolve it inside
+    # the new root and fails with "Can't create file at ...: No such file or directory",
+    # which breaks every Bash call. A relative link resolves within the new root.
+    # $dir is /workspace/<project>, so the venv is always at ../venvs/<project>.
+    link_target="../venvs/$project"
 
     mkdir -p "$target"
 
-    if [ ! -L "$venv_path" ] || [ "$(readlink "$venv_path")" != "$target" ]; then
+    if [ ! -L "$venv_path" ] || [ "$(readlink "$venv_path")" != "$link_target" ]; then
         rm -rf "$venv_path"
-        ln -s "$target" "$venv_path"
+        ln -s "$link_target" "$venv_path"
     fi
 done
 
