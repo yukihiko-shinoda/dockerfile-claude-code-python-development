@@ -49,17 +49,18 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # Pinned to a commit SHA so the policy cannot change under us; bump manually.
 # ADD creates /etc/claude-code automatically; remote files default to mode 0600, so set 0644 explicitly.
 ADD --chmod=0644 https://raw.githubusercontent.com/yukihiko-shinoda/claude-code-settings-file/05970207b46204d4c67988a8ec14fb77a9e5fb24/managed-settings.json /etc/claude-code/managed-settings.json
-# git credential source for github.com HTTPS operations: reads the
+# git credential source for GitHub HTTPS operations: reads the
 # GIT_AUTH_TOKEN Docker secret, mounted at /run/secrets/GIT_AUTH_TOKEN,
 # instead of relying solely on VS Code Dev Containers' own git config
 # forwarding from the host -- see git-agent-credential-helper.sh for why
 # this coexists with, rather than replaces, that forwarding.
+# The helper is registered per host by entrypoint.sh at container start (GH_HOST,
+# default github.com), not here, so the published image isn't tied to one GitHub host.
 # NOTE: only usable outside Claude Code's sandbox; authenticated git commands
 # run by Claude Code itself are not supported yet:
 # https://github.com/anthropics/claude-code/issues/95752
 COPY ./distributions/git-agent-credential-helper.sh /usr/local/bin/git-agent-credential-helper
-RUN chmod +x /usr/local/bin/git-agent-credential-helper \
- && git config --system credential.https://github.com.helper /usr/local/bin/git-agent-credential-helper
+RUN chmod +x /usr/local/bin/git-agent-credential-helper
 # HOL Guard: runtime protection for AI agents, watching this container's claude-code
 # harness for secret exposure, prompt injection, unsafe commands, and malicious packages.
 # PyPI: https://pypi.org/project/hol-guard/

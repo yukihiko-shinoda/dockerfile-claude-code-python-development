@@ -23,9 +23,14 @@ for pyproject in /workspace/*/pyproject.toml; do
     fi
 done
 
-# Authenticates with GitHub using a personal access token stored in a secret file
+# Authenticates with GitHub (github.com or GitHub Enterprise Server) using a personal access
+# token stored in a secret file. The host is chosen at container start via GH_HOST (the same
+# variable gh itself honors) so a single published image works for any GitHub host.
+gh_host="${GH_HOST:-github.com}"
 token_file=/run/secrets/GIT_AUTH_TOKEN
-[ -s "$token_file" ] || exit 0
-gh auth login --hostname github.com --with-token --insecure-storage < "$token_file"
+if [ -s "$token_file" ]; then
+    git config --system "credential.https://${gh_host}.helper" /usr/local/bin/git-agent-credential-helper
+    gh auth login --hostname "$gh_host" --with-token --insecure-storage < "$token_file"
+fi
 
 exec "$@"

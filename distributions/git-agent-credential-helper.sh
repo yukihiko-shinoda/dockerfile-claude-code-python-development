@@ -9,14 +9,16 @@
 # Until that is fixed, this helper only serves git commands that run outside
 # the sandbox (e.g. from a terminal in the dev container).
 #
-# git credential helper source for github.com HTTPS operations: reads the
+# git credential helper source for GitHub HTTPS operations: reads the
 # GIT_AUTH_TOKEN Docker secret mounted at /run/secrets/GIT_AUTH_TOKEN (the same
 # file entrypoint.sh uses for `gh auth login`), instead of relying on VS Code
 # Dev Containers' own git config forwarding from the host.
 #
-# Registered via `git config --system credential.https://github.com.helper`
-# (see Dockerfile), so git only invokes this for github.com HTTPS remotes --
-# scoped that way rather than checked inside this script. Being registered at
+# Registered by entrypoint.sh at container start via
+# `git config --system credential.https://<GH_HOST>.helper` (GH_HOST defaults to
+# github.com, and may be a GitHub Enterprise Server host), so git only invokes this
+# for that host's HTTPS remotes -- scoped that way rather than checked inside this
+# script, and not baked into the image so it isn't tied to one host. Being registered at
 # the system scope also means it is tried before VS Code's own helper (which
 # additionally sets itself at the global scope -- observed at both
 # /etc/gitconfig and /root/.gitconfig): git queries configured helpers in
