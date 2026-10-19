@@ -61,13 +61,6 @@ ADD --chmod=0644 https://raw.githubusercontent.com/yukihiko-shinoda/claude-code-
 # https://github.com/anthropics/claude-code/issues/95752
 COPY ./distributions/git-agent-credential-helper.sh /usr/local/bin/git-agent-credential-helper
 RUN chmod +x /usr/local/bin/git-agent-credential-helper
-# HOL Guard: runtime protection for AI agents, watching this container's claude-code
-# harness for secret exposure, prompt injection, unsafe commands, and malicious packages.
-# PyPI: https://pypi.org/project/hol-guard/
-# NOTE: version bump is manual, same as csklint above -- not tracked by Dependabot
-RUN uv tool install "hol-guard==${VERSION_HOL_GUARD}" \
- && hol-guard install claude-code \
- && hol-guard settings set protection watch
 # Claude Code
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # - Troubleshoot installation and login - Claude Code Docs

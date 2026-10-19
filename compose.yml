@@ -14,9 +14,6 @@ services:
         # - Releases · gitleaks/gitleaks
         #   https://github.com/gitleaks/gitleaks/releases
         VERSION_GITLEAKS: 8.30.1
-        # - Releases · hashgraph-online/hol-guard
-        #   https://github.com/hashgraph-online/hol-guard/releases
-        VERSION_HOL_GUARD: 3.35.0
         # - Cloud SDK release notes  |  Google Cloud CLI Documentation
         #   https://cloud.google.com/sdk/docs/release-notes
         GCLOUD_VERSION: 588.0.0
