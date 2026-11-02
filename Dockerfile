@@ -195,7 +195,7 @@ RUN case "${BUILDARCH}" in \
  && rm -f "google-workspace-cli-${GWS_TARGET}.tar.gz" "google-workspace-cli-${GWS_TARGET}.tar.gz.sha256"
 # GCP credential source for gws: activates the claude-code service account's
 # static JSON key (Docker secret, minted by gcp-agent-key.sh, mounted at
-# /opt/claude-agent-secrets/claude-code-key.json -- see compose.yml) with
+# /opt/claude-agent-secrets/claude-code-key.json -- see compose.yaml) with
 # gcloud, mints a short-lived GCP OAuth token scoped to Drive/Docs from it,
 # then execs into the real gws binary (renamed to gws-real above) with that
 # token. Installed AT /usr/local/bin/gws itself (shadowing the real binary),

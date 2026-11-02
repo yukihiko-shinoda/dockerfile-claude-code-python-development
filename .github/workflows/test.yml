@@ -25,4 +25,4 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           targets: app-release
       - uses: actions/checkout@v6
-      - run: docker compose -f compose.yml -f compose.test.yml run --rm claude-code-python
+      - run: docker compose -f compose.yaml -f compose.test.yaml run --rm claude-code-python
