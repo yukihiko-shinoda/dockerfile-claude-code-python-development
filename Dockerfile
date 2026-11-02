@@ -1,5 +1,6 @@
 ARG DOCKER_IMAGE_TAG_UV=debian-slim
 FROM ghcr.io/astral-sh/uv:${DOCKER_IMAGE_TAG_UV} AS uv
+ARG VERSION_MANAGED_SETTINGS_JSON
 ARG VERSION_CLAUDE_CODE
 # Reason: This is not secret but tool name includes the word:`secrets`
 # hadolint ignore=DL3064
@@ -48,7 +49,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # Source: https://github.com/yukihiko-shinoda/claude-code-settings-file/blob/main/managed-settings.json
 # Pinned to a commit SHA so the policy cannot change under us; bump manually.
 # ADD creates /etc/claude-code automatically; remote files default to mode 0600, so set 0644 explicitly.
-ADD --chmod=0644 https://raw.githubusercontent.com/yukihiko-shinoda/claude-code-settings-file/05970207b46204d4c67988a8ec14fb77a9e5fb24/managed-settings.json /etc/claude-code/managed-settings.json
+ADD --chmod=0644 https://raw.githubusercontent.com/yukihiko-shinoda/claude-code-settings-file/${VERSION_MANAGED_SETTINGS_JSON}/managed-settings.json /etc/claude-code/managed-settings.json
 # git credential source for GitHub HTTPS operations: reads the
 # GIT_AUTH_TOKEN Docker secret, mounted at /run/secrets/GIT_AUTH_TOKEN,
 # instead of relying solely on VS Code Dev Containers' own git config

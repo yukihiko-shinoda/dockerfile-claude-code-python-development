@@ -2,6 +2,9 @@ services:
   claude-code-python:
     build:
       args:
+        # - Commits · yukihiko-shinoda/claude-code-settings-file
+        #   https://github.com/yukihiko-shinoda/claude-code-settings-file/commits/main/
+        VERSION_MANAGED_SETTINGS_JSON: 05970207b46204d4c67988a8ec14fb77a9e5fb24
         # - uv versions · astral-sh
         #   https://github.com/astral-sh/uv/pkgs/container/uv/versions?filters%5Bversion_type%5D=tagged
         DOCKER_IMAGE_TAG_UV: 0.13.5-trixie-slim
