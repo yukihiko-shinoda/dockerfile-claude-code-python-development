@@ -10,19 +10,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1  # v4.4.0
       - id: buildx
-        uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550  # v4.8.0
         with:
           username: ${{ vars.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - id: set-tag
         run: echo "DOCKER_TAG=test" >> $GITHUB_ENV
-      - uses: docker/bake-action@v7
+      - uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e  # v7.5.0
         with:
           builder: ${{ steps.buildx.outputs.name }}
           targets: app-release
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - run: docker compose -f compose.yaml -f compose.test.yaml run --rm claude-code-python
