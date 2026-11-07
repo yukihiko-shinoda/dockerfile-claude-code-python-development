@@ -7,10 +7,10 @@ services:
         VERSION_MANAGED_SETTINGS_JSON: ca5f37a52c0321e076c9db16abe8fcf383b7f032
         # - uv versions · astral-sh
         #   https://github.com/astral-sh/uv/pkgs/container/uv/versions?filters%5Bversion_type%5D=tagged
-        DOCKER_IMAGE_TAG_UV: 0.13.6-trixie-slim
+        DOCKER_IMAGE_TAG_UV: 0.13.7-trixie-slim
         # - @anthropic-ai/claude-code - npm
         #   https://www.npmjs.com/package/@anthropic-ai/claude-code?activeTab=versions
-        VERSION_CLAUDE_CODE: 2.1.309
+        VERSION_CLAUDE_CODE: 2.1.311
         # - Tags · awslabs/git-secrets
         #   https://github.com/awslabs/git-secrets/tags
         VERSION_GIT_SECRETS: 1.3.0
@@ -19,7 +19,7 @@ services:
         VERSION_GITLEAKS: 8.30.1
         # - Cloud SDK release notes  |  Google Cloud CLI Documentation
         #   https://cloud.google.com/sdk/docs/release-notes
-        GCLOUD_VERSION: 591.0.0
+        GCLOUD_VERSION: 592.0.0
         # - Releases · googleworkspace/cli
         #   https://github.com/googleworkspace/cli/releases
         GWS_VERSION: 0.22.5
