@@ -17,12 +17,12 @@ jobs:
         with:
           username: ${{ vars.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: set-tag
         run: echo "DOCKER_TAG=test" >> $GITHUB_ENV
       - uses: docker/bake-action@v7
         with:
           builder: ${{ steps.buildx.outputs.name }}
           targets: app-release
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: docker compose -f compose.yaml -f compose.test.yaml run --rm claude-code-python
