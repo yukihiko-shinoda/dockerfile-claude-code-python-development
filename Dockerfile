@@ -14,30 +14,33 @@ WORKDIR /workspace
 # - Using uv in Docker | uv
 #   https://docs.astral.sh/uv/guides/integration/docker/#caching
 ENV UV_LINK_MODE=copy
+# Reason: Debian stable (fixed by the base image) only receives security and critical fixes,
+#         and pinning a suite such as `/stable` would exclude the fixes from `trixie-security`.
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install --no-install-recommends -y \
     #   For running Semgrep, otherwise following error occurs:
     #   Fatal error: exception Failure: ca-certs: no trust anchor file found, looked into
     #     /etc/ssl/certs/ca-certificates.crt,
     #     /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem,
     #     /etc/ssl/ca-bundle.pem.
-    ca-certificates/stable \
+    ca-certificates \
     # To install Claude Code
-    curl/stable \
+    curl \
     # To enable Claude Code sandbox
     # - Configure the sandboxed Bash tool - Claude Code Docs
     #   https://code.claude.com/docs/en/sandboxing#set-up-linux-and-wsl2
-    bubblewrap/stable \
-    socat/stable \
+    bubblewrap \
+    socat \
     # To interact with GitHub repositories
-    git/stable \
+    git \
     # To install git-secrets
-    make/stable \
+    make \
     #   For `ps` command, otherwise following error occurs when running claude-code::
     # - [BUG] Node.js error when `ps` is unavailable · Issue #2276 · anthropics/claude-code
     #   https://github.com/anthropics/claude-code/issues/2276
-    procps/stable \
+    procps \
     # To install GitHub CLI, git-secrets and Gitleaks
-    wget/stable \
+    wget \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 # Force the Claude Code sandbox on for every session in this container:
@@ -161,12 +164,14 @@ CMD ["claude"]
 # Google Cloud CLI (gcloud)
 # - Install gcloud CLI | Google Cloud SDK Documentation
 #   https://docs.cloud.google.com/sdk/docs/install#deb
+# Reason: Same as the first `apt-get install` above.
+# hadolint ignore=DL3008
 RUN apt-get upgrade \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
-        apt-transport-https/stable \
-        ca-certificates/stable \
-        gnupg/stable \
+        apt-transport-https \
+        ca-certificates \
+        gnupg \
  && apt-get -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
