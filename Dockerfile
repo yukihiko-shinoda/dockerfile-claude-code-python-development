@@ -70,7 +70,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 #   https://code.claude.com/docs/en/sandboxing#enterprise-sandbox-settings
 #   https://code.claude.com/docs/en/settings#managed-settings
 # Source: https://github.com/yukihiko-shinoda/claude-code-settings-file/blob/main/managed-settings.json
-# Pinned to a commit SHA so the policy cannot change under us; bump manually.
+# Pinned to a commit SHA so the policy cannot change without a reviewed PR; Renovate proposes
+# bumps to the head of main (see renovate.json).
 # ADD creates /etc/claude-code automatically; remote files default to mode 0600, so set 0644 explicitly.
 ADD --chmod=0644 https://raw.githubusercontent.com/yukihiko-shinoda/claude-code-settings-file/${VERSION_MANAGED_SETTINGS_JSON}/managed-settings.json /etc/claude-code/managed-settings.json
 # git credential source for GitHub HTTPS operations: reads the

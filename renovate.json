@@ -1,0 +1,67 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate only bumps the compose.yaml build args that Dependabot cannot see; Dependabot keeps handling Docker, Docker Compose, GitHub Actions and uv.",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["custom.regex"],
+  "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Versions and image tags annotated with `# renovate: datasource=... depName=...`",
+      "managerFilePatterns": ["/^compose\\.yaml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+[A-Z_]+: (?:[^\\s:]+:)?(?<currentValue>\\S+)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Commit SHAs pinned to the head of a branch, annotated with `# renovate: datasource=git-refs depName=<url> branch=<branch>`",
+      "managerFilePatterns": ["/^compose\\.yaml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>git-refs) depName=(?<depName>\\S+) branch=(?<currentValue>\\S+)\\s+[A-Z_]+: (?<currentDigest>[0-9a-f]{40})"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Keep DOCKER_IMAGE_TAG_UV and the uv BASE_IMAGE tag in sync in one PR.",
+      "matchPackageNames": ["ghcr.io/astral-sh/uv"],
+      "groupName": "uv"
+    },
+    {
+      "description": "Follow Claude Code's `stable` release channel (npm dist-tag) instead of `latest`.",
+      "matchPackageNames": ["@anthropic-ai/claude-code"],
+      "followTag": "stable"
+    },
+    {
+      "description": "GitHub release tags carry a `v` prefix that the build args omit.",
+      "matchPackageNames": ["betterleaks/betterleaks", "googleworkspace/cli"],
+      "extractVersion": "^v(?<version>.+)$"
+    },
+    {
+      "description": "Stay on Betterleaks v1.x until v2 is stable; see the Betterleaks comment in the Dockerfile.",
+      "matchPackageNames": ["betterleaks/betterleaks"],
+      "allowedVersions": "<2"
+    },
+    {
+      "description": "Only plain `X.Y.Z` tags, not `-slim`, `-alpine`, `-<date>` and so on.",
+      "matchPackageNames": ["gcr.io/google.com/cloudsdktool/google-cloud-cli"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+      "prBodyNotes": [
+        "Re-check the vendored urllib3 copies of gsutil and bq (see the Trivy blind-spot comment in the Dockerfile)."
+      ]
+    },
+    {
+      "description": "Keep the Ubuntu release suffix (e.g. `-resolute`) and skip the per-arch tags.",
+      "matchPackageNames": ["mcr.microsoft.com/playwright/python"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>[a-z]+)$"
+    },
+    {
+      "description": "Keep the minor version the same as Ubuntu's default python3 of the Playwright BASE_IMAGE; only the patch version is brought up to date.",
+      "matchPackageNames": ["python"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    }
+  ]
+}
