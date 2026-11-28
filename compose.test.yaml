@@ -10,7 +10,11 @@ services:
       - -c
       # `playwright install` covers the case that the Playwright resolved by uv is newer than
       # the browsers bundled in the official base image.
+      # python3 must resolve to the uv-managed Python, not Ubuntu's /usr/bin/python3; ssl's verify
+      # paths are printed to confirm the managed OpenSSL reads the system CA store (/etc/ssl).
       - >-
         bash tests/smoke.sh
+        && readlink -f "$$(command -v python3)" | grep '^/root/.local/share/uv/python/'
+        && python3 -c 'import ssl, sys; print(sys.version); print(ssl.get_default_verify_paths())'
         && uv run --directory tests/playwright playwright install chromium
         && uv run --directory tests/playwright pytest

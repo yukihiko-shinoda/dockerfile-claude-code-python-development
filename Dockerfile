@@ -7,7 +7,7 @@ ARG DOCKER_IMAGE_TAG_UV=debian-slim
 #   official image instead of being maintained here.
 ARG BASE_IMAGE=ghcr.io/astral-sh/uv:debian-slim
 FROM ghcr.io/astral-sh/uv:${DOCKER_IMAGE_TAG_UV} AS uv
-FROM ${BASE_IMAGE}
+FROM ${BASE_IMAGE} AS base
 # - Using uv in Docker | uv
 #   https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
 # No-op when the base image is the uv image itself; required for other base images.
@@ -236,3 +236,26 @@ RUN case "${TARGETARCH}" in \
 # claude_code WIF IAM policy binding) if that fallback path is ever revived.
 COPY distributions/gws-agent.sh /usr/local/bin/gws
 RUN chmod +x /usr/local/bin/gws
+
+# Image-specific stages. Selected by `build.target` in compose.yaml (and so by the bake targets).
+# The last stage is the default when no target is given, keeping a plain `docker build` producing
+# the Python development image as before.
+
+# Reason: This is a special treatment for the Brotli / eMudhra security vulnerabilities reported
+#         against the Python of the official Playwright image, not a general policy of tracking
+#         the latest Python; revisit it once Ubuntu's own python3 no longer has them.
+# Python for the Playwright image: the official image ships Ubuntu's apt `python3`, whose version
+# is fixed by the Ubuntu release (e.g. 3.14.4 on resolute) and lags behind upstream patch releases.
+# A uv-managed Python is installed instead, and `--default` puts `python` / `python3` into
+# /root/.local/bin, which precedes /usr/bin in PATH, so both direct calls and `uv run` use it.
+# The Python development image has no system Python at all and keeps letting `uv run` pick the
+# version each project requires.
+FROM base AS claude-code-playwright-python
+# - Python Releases | Python.org
+#   https://www.python.org/downloads/
+ARG VERSION_PYTHON
+# Never let uv fall back to Ubuntu's /usr/bin/python3.
+ENV UV_PYTHON_PREFERENCE=only-managed
+RUN uv python install "${VERSION_PYTHON}" --default
+
+FROM base AS claude-code-python
