@@ -1,26 +1,35 @@
 # Versions shared by every image variant; each service only adds its own BASE_IMAGE.
+# The `# renovate:` comments let Renovate's custom regex manager (see renovate.json) bump
+# these build args, which Dependabot cannot see.
 x-build-args: &build-args
   # - Commits · yukihiko-shinoda/claude-code-settings-file
   #   https://github.com/yukihiko-shinoda/claude-code-settings-file/commits/main/
+  # renovate: datasource=git-refs depName=https://github.com/yukihiko-shinoda/claude-code-settings-file branch=main
   VERSION_MANAGED_SETTINGS_JSON: 97893b1d64c14be2ee757ccddf72a5c24f939108
   # - uv versions · astral-sh
   #   https://github.com/astral-sh/uv/pkgs/container/uv/versions?filters%5Bversion_type%5D=tagged
+  # renovate: datasource=docker depName=ghcr.io/astral-sh/uv
   DOCKER_IMAGE_TAG_UV: 0.13.10-trixie-slim
   # - @anthropic-ai/claude-code - npm
   #   https://www.npmjs.com/package/@anthropic-ai/claude-code?activeTab=versions
+  # renovate: datasource=npm depName=@anthropic-ai/claude-code
   VERSION_CLAUDE_CODE: 2.1.326
   # - Tags · awslabs/git-secrets
   #   https://github.com/awslabs/git-secrets/tags
+  # renovate: datasource=github-tags depName=awslabs/git-secrets
   VERSION_GIT_SECRETS: 1.3.0
   # - Releases · betterleaks/betterleaks
   #   https://github.com/betterleaks/betterleaks/releases
   # Stay on v1.x until v2 is stable; see the Betterleaks comment in the Dockerfile.
+  # renovate: datasource=github-releases depName=betterleaks/betterleaks
   VERSION_BETTERLEAKS: 1.10.1
   # - Cloud SDK release notes  |  Google Cloud CLI Documentation
   #   https://cloud.google.com/sdk/docs/release-notes
+  # renovate: datasource=docker depName=gcr.io/google.com/cloudsdktool/google-cloud-cli
   GCLOUD_VERSION: 594.0.1
   # - Releases · googleworkspace/cli
   #   https://github.com/googleworkspace/cli/releases
+  # renovate: datasource=github-releases depName=googleworkspace/cli
   GWS_VERSION: 0.22.5
 x-volumes: &volumes
   - .:/workspace
@@ -34,6 +43,7 @@ services:
       args:
         <<: *build-args
         # Keep the tag in sync with DOCKER_IMAGE_TAG_UV above.
+        # renovate: datasource=docker depName=ghcr.io/astral-sh/uv
         BASE_IMAGE: ghcr.io/astral-sh/uv:0.13.10-trixie-slim
       context: .
       target: claude-code-python
@@ -46,6 +56,7 @@ services:
         <<: *build-args
         # - Microsoft Artifact Registry
         #   https://mcr.microsoft.com/en-us/artifact/mar/playwright/python/tags
+        # renovate: datasource=docker depName=mcr.microsoft.com/playwright/python
         BASE_IMAGE: mcr.microsoft.com/playwright/python:v1.65.2-resolute
         # - Python Releases | Python.org
         #   https://www.python.org/downloads/
@@ -53,6 +64,7 @@ services:
         # comment on the claude-code-playwright-python stage in the Dockerfile.
         # Keep the minor version the same as Ubuntu's default python3 of BASE_IMAGE
         # (3.14 on resolute); only the patch version is brought up to date.
+        # renovate: datasource=python-version depName=python
         VERSION_PYTHON: 3.14.10
       context: .
       target: claude-code-playwright-python
