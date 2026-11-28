@@ -18,7 +18,7 @@ ARG VERSION_CLAUDE_CODE
 # hadolint ignore=DL3064
 ARG VERSION_GIT_SECRETS
 ARG VERSION_HOL_GUARD
-ARG VERSION_GITLEAKS
+ARG VERSION_BETTERLEAKS
 ARG GCLOUD_VERSION
 ARG GWS_VERSION
 # TARGETARCH (not BUILDARCH): the gws binary must match the image platform, which differs
@@ -54,7 +54,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     # - [BUG] Node.js error when `ps` is unavailable · Issue #2276 · anthropics/claude-code
     #   https://github.com/anthropics/claude-code/issues/2276
     procps \
-    # To install GitHub CLI, git-secrets and Gitleaks
+    # To install GitHub CLI, git-secrets and Betterleaks
     wget \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
@@ -135,29 +135,32 @@ RUN version="${VERSION_GIT_SECRETS}" \
       "git-secrets-${version}/Makefile" "git-secrets-${version}/git-secrets" "git-secrets-${version}/git-secrets.1" \
  && make -C "$workdir/git-secrets-${version}" install \
  && rm -rf "$workdir"
-# Gitleaks
-# - gitleaks/gitleaks: Find secrets with Gitleaks
-#   https://github.com/gitleaks/gitleaks
-RUN version="${VERSION_GITLEAKS}" \
+# Betterleaks (successor to Gitleaks by its original author; Gitleaks itself is
+# security-patch-only and its last release is built with an outdated Go toolchain)
+# - betterleaks/betterleaks: Find leaked secrets everywhere
+#   https://github.com/betterleaks/betterleaks
+# Stay on v1 until v2 is stable: v1 keeps the Gitleaks CLI (`git --pre-commit --staged`) and
+# config (`.gitleaks.toml`, `.gitleaksignore`) compatibility that v2 drops.
+RUN version="${VERSION_BETTERLEAKS}" \
  && case "$(dpkg --print-architecture)" in \
       amd64) arch=x64 ;; \
       arm64) arch=arm64 ;; \
-      *) echo "Unsupported architecture for gitleaks: $(dpkg --print-architecture)" >&2; exit 1 ;; \
+      *) echo "Unsupported architecture for betterleaks: $(dpkg --print-architecture)" >&2; exit 1 ;; \
     esac \
- && tarball="gitleaks_${version}_linux_${arch}.tar.gz" \
+ && tarball="betterleaks_${version}_linux_${arch}.tar.gz" \
  && workdir=$(mktemp -d) \
- && wget -nv -O"$workdir/$tarball" "https://github.com/gitleaks/gitleaks/releases/download/v${version}/${tarball}" \
- && wget -nv -O"$workdir/checksums.txt" "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_checksums.txt" \
+ && wget -nv -O"$workdir/$tarball" "https://github.com/betterleaks/betterleaks/releases/download/v${version}/${tarball}" \
+ && wget -nv -O"$workdir/checksums.txt" "https://github.com/betterleaks/betterleaks/releases/download/v${version}/checksums.txt" \
  && expected=$(awk -v f="$tarball" '$2 == f {print $1}' "$workdir/checksums.txt") \
  && actual=$(sha256sum "$workdir/$tarball" | awk '{print $1}') \
  && if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then \
-      echo "gitleaks checksum verification failed: expected '$expected', actual '$actual'" >&2; exit 1; \
+      echo "betterleaks checksum verification failed: expected '$expected', actual '$actual'" >&2; exit 1; \
     fi \
- && tar -xzf "$workdir/$tarball" -C "$workdir" gitleaks \
- && install -m 0755 "$workdir/gitleaks" /usr/local/bin/gitleaks \
+ && tar --no-same-owner -xzf "$workdir/$tarball" -C "$workdir" betterleaks \
+ && install -m 0755 "$workdir/betterleaks" /usr/local/bin/betterleaks \
  && rm -rf "$workdir"
 COPY --chmod=0755 distributions/git-hooks/ /usr/local/share/git-hooks/
-# Global git secret-scanning hooks (git-secrets + gitleaks).
+# Global git secret-scanning hooks (git-secrets + betterleaks).
 # core.hooksPath and the git-secrets AWS pattern registration go to the --system scope
 # (/etc/gitconfig, plus an included side file for the AWS patterns, since git-secrets'
 # --register-aws only supports writing --global) rather than --global (/root/.gitconfig):

@@ -26,7 +26,7 @@ test -x /usr/local/bin/git-agent-credential-helper
 test "$(git config --system core.hooksPath)" = /usr/local/share/git-hooks
 # grep without -q: an early exit could SIGPIPE `git secrets` and fail under pipefail
 git secrets --list | grep AKIA > /dev/null
-gitleaks version
+betterleaks version
 
 # Google Cloud CLI and gws
 # gws-real rather than the gws wrapper, which needs a service account key secret to mint a token

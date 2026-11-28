@@ -9,7 +9,7 @@ full rationale (system vs. global config scope, why this lives in the Dockerfile
 
 ## Files
 
-- **`pre-commit`** — runs `git secrets --pre_commit_hook` and a `gitleaks` scan of staged
+- **`pre-commit`** — runs `git secrets --pre_commit_hook` and a `betterleaks` scan of staged
   changes, then chains to a repo-local hook (see `_local-hook-exec` below).
 - **`commit-msg`** — runs `git secrets --commit_msg_hook` on the commit message, then chains
   to a repo-local hook.
