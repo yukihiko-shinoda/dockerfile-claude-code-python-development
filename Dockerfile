@@ -198,6 +198,12 @@ RUN apt-get upgrade \
  && apt-get -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+# Known blind spot of the Trivy scan: google-cloud-cli vendors urllib3 copies without package
+# metadata, which Trivy cannot version and so never reports. As of 594.0.1, gsutil
+# (platform/gsutil/third_party/urllib3, 2.2.2) and bq (platform/bq/third_party/urllib3, 1.26.9) are
+# affected by CVE-2026-97687 and CVE-2026-97689 (fixed in urllib3 2.8.0), while gcloud itself
+# (lib/third_party/urllib3) already has 2.8.0. Re-check these on each GCLOUD_VERSION bump, e.g.
+#   grep -h '^__version__' /usr/lib/google-cloud-sdk/platform/*/third_party/urllib3/{,src/urllib3/}_version.py
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg \
  && echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" > /etc/apt/sources.list.d/google-cloud-sdk.list \
  && apt-get update \
