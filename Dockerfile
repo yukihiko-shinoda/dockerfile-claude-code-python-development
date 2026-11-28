@@ -1,5 +1,17 @@
 ARG DOCKER_IMAGE_TAG_UV=debian-slim
+# The base image is switched per bake target / compose service so that one Dockerfile
+# produces every image variant:
+# - futureys/claude-code-python-development: ghcr.io/astral-sh/uv:<tag> (Debian)
+# - futureys/claude-code-playwright-python:  mcr.microsoft.com/playwright/python:<tag> (Ubuntu)
+#   Building the Playwright base (browsers and their OS dependencies) is delegated to the
+#   official image instead of being maintained here.
+ARG BASE_IMAGE=ghcr.io/astral-sh/uv:debian-slim
 FROM ghcr.io/astral-sh/uv:${DOCKER_IMAGE_TAG_UV} AS uv
+FROM ${BASE_IMAGE} AS base
+# - Using uv in Docker | uv
+#   https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
+# No-op when the base image is the uv image itself; required for other base images.
+COPY --from=uv /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 ARG VERSION_MANAGED_SETTINGS_JSON
 ARG VERSION_CLAUDE_CODE
 # Reason: This is not secret but tool name includes the word:`secrets`
@@ -9,13 +21,16 @@ ARG VERSION_HOL_GUARD
 ARG VERSION_GITLEAKS
 ARG GCLOUD_VERSION
 ARG GWS_VERSION
-ARG BUILDARCH
+# TARGETARCH (not BUILDARCH): the gws binary must match the image platform, which differs
+# from the build machine when cross-building linux/arm64 on an amd64 runner via QEMU.
+ARG TARGETARCH
 WORKDIR /workspace
 # - Using uv in Docker | uv
 #   https://docs.astral.sh/uv/guides/integration/docker/#caching
 ENV UV_LINK_MODE=copy
-# Reason: Debian stable (fixed by the base image) only receives security and critical fixes,
-#         and pinning a suite such as `/stable` would exclude the fixes from `trixie-security`.
+# Reason: The distribution release (Debian stable / Ubuntu, fixed by the base image) only
+#         receives security and critical fixes, and pinning a suite such as `/stable` would
+#         exclude the fixes from the security suite (e.g. `trixie-security`).
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install --no-install-recommends -y \
     #   For running Semgrep, otherwise following error occurs:
@@ -186,10 +201,10 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -
 # runtime needed.
 # - Releases · googleworkspace/cli
 #   https://github.com/googleworkspace/cli/releases
-RUN case "${BUILDARCH}" in \
+RUN case "${TARGETARCH}" in \
         amd64) GWS_TARGET=x86_64-unknown-linux-gnu ;; \
         arm64) GWS_TARGET=aarch64-unknown-linux-gnu ;; \
-        *) echo "Unsupported BUILDARCH for gws: ${BUILDARCH}" >&2; exit 1 ;; \
+        *) echo "Unsupported TARGETARCH for gws: ${TARGETARCH}" >&2; exit 1 ;; \
     esac \
  && curl -O -L "https://github.com/googleworkspace/cli/releases/download/v${GWS_VERSION}/google-workspace-cli-${GWS_TARGET}.tar.gz" \
  && curl -O -L "https://github.com/googleworkspace/cli/releases/download/v${GWS_VERSION}/google-workspace-cli-${GWS_TARGET}.tar.gz.sha256" \
@@ -221,3 +236,26 @@ RUN case "${BUILDARCH}" in \
 # claude_code WIF IAM policy binding) if that fallback path is ever revived.
 COPY distributions/gws-agent.sh /usr/local/bin/gws
 RUN chmod +x /usr/local/bin/gws
+
+# Image-specific stages. Selected by `build.target` in compose.yaml (and so by the bake targets).
+# The last stage is the default when no target is given, keeping a plain `docker build` producing
+# the Python development image as before.
+
+# Reason: This is a special treatment for the Brotli / eMudhra security vulnerabilities reported
+#         against the Python of the official Playwright image, not a general policy of tracking
+#         the latest Python; revisit it once Ubuntu's own python3 no longer has them.
+# Python for the Playwright image: the official image ships Ubuntu's apt `python3`, whose version
+# is fixed by the Ubuntu release (e.g. 3.14.4 on resolute) and lags behind upstream patch releases.
+# A uv-managed Python is installed instead, and `--default` puts `python` / `python3` into
+# /root/.local/bin, which precedes /usr/bin in PATH, so both direct calls and `uv run` use it.
+# The Python development image has no system Python at all and keeps letting `uv run` pick the
+# version each project requires.
+FROM base AS claude-code-playwright-python
+# - Python Releases | Python.org
+#   https://www.python.org/downloads/
+ARG VERSION_PYTHON
+# Never let uv fall back to Ubuntu's /usr/bin/python3.
+ENV UV_PYTHON_PREFERENCE=only-managed
+RUN uv python install "${VERSION_PYTHON}" --default
+
+FROM base AS claude-code-python
