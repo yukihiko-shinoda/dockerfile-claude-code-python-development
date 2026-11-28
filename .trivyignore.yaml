@@ -1,0 +1,106 @@
+# Findings that only an upstream release can fix, accepted temporarily so the Trivy gate keeps
+# failing on any *new* fixable CRITICAL/HIGH finding. Loaded through trivy.yaml, both by local
+# `trivy image` runs and by the gate step in .github/workflows/trivy.yml; the SARIF step there
+# turns it off, so these findings stay visible in the Security tab until fixed.
+# - Each entry is scoped to the affected package version (`purls`), and Go binaries also to the
+#   binary (`paths`; Trivy requires both to match), so the same CVE found anywhere else, or in an
+#   upgraded version, is still reported.
+# - Each `statement` records why the finding is not reachable, for which version, and how that was
+#   checked. These are point-in-time observations, not proof: re-check them before extending an
+#   entry. "Not linked" was checked by searching the binary for the package's function names
+#   (e.g. `grep -a -c -F 'golang.org/x/crypto/ssh.' <binary>` returning 0); Trivy flags every
+#   module a Go binary depends on, whether or not the vulnerable code is compiled in.
+# - `expired_at` makes an entry stop applying after that date: re-check upstream then and either
+#   drop the entry (fixed) or extend it with a new date.
+# - Filtering vulnerabilities - Trivy
+#   https://trivy.dev/latest/docs/configuration/filtering/#trivyignoreyaml
+vulnerabilities:
+  # gcloud-crc32c (google-cloud-cli 594.0.1, GCLOUD_VERSION in compose.yaml), built with Go 1.27.2.
+  - id: CVE-2026-111943
+    paths:
+      - usr/lib/google-cloud-sdk/bin/gcloud-crc32c
+    purls:
+      - pkg:golang/stdlib@v1.27.2
+    statement: >-
+      Not reachable in google-cloud-cli 594.0.1: gcloud-crc32c links no crypto/x509, crypto/tls or
+      net/http (no such function names in the binary), so it never verifies certificates.
+      Waiting for a google-cloud-cli release built with Go >= 1.27.3
+    expired_at: 2027-01-31
+  # pip's vendored libraries inside gcloud's bundled Python (google-cloud-cli 594.0.1), detected from
+  # usr/lib/google-cloud-sdk/platform/bundledpythonunix/lib/python3.14/site-packages/pip/_vendor/bom.cdx.json.
+  # SBOM-derived findings carry no file path, so they are scoped by package URL only. This pip is
+  # not on PATH and nothing in the image runs it.
+  - id: CVE-2026-114613
+    purls:
+      - pkg:pypi/msgpack@1.1.2
+    statement: >-
+      Not reachable in google-cloud-cli 594.0.1: the leak is in msgpack's C extension
+      (_cmsgpack), but pip vendors only the pure-Python fallback (pip/_vendor/msgpack has no
+      _cmsgpack module). Waiting for a google-cloud-cli update
+    expired_at: 2027-01-31
+  - id: GHSA-6v7p-g79w-8964
+    purls:
+      - pkg:pypi/msgpack@1.1.2
+    statement: >-
+      Low risk in google-cloud-cli 594.0.1: needs an Unpacker reused after an error on untrusted
+      input; pip only unpacks its own local HTTP cache, and this pip is never run.
+      Waiting for a google-cloud-cli update
+    expired_at: 2027-01-31
+  - id: CVE-2025-47273
+    purls:
+      - pkg:pypi/setuptools@70.3.0
+    statement: >-
+      Not reachable in google-cloud-cli 594.0.1: the flaw is in setuptools.package_index, but pip
+      vendors only pkg_resources (no package_index.py under google-cloud-sdk).
+      Waiting for a google-cloud-cli update
+    expired_at: 2027-01-31
+  - id: CVE-2026-97687
+    purls:
+      - pkg:pypi/urllib3@2.7.0
+    statement: >-
+      Low risk in google-cloud-cli 594.0.1: needs an HTTPS proxy plus separate target-server TLS
+      settings, and this pip is never run. Note gsutil (urllib3 2.2.2) and bq (urllib3 1.26.9)
+      carry the same flaw without Trivy detecting them; see the gcloud comment in the Dockerfile.
+      Waiting for a google-cloud-cli update
+    expired_at: 2027-01-31
+  - id: CVE-2026-97689
+    purls:
+      - pkg:pypi/urllib3@2.7.0
+    statement: >-
+      Low risk in google-cloud-cli 594.0.1: client-side memory exhaustion caused by a malicious
+      server, and this pip is never run. Same undetected gsutil/bq copies as CVE-2026-97687.
+      Waiting for a google-cloud-cli update
+    expired_at: 2027-01-31
+  # Betterleaks v1.10.1 (VERSION_BETTERLEAKS in compose.yaml); its dependencies are already updated
+  # on the v2 line, so the next v1.x release or stable v2 fixes these.
+  - id: CVE-2026-63209
+    paths:
+      - usr/local/bin/betterleaks
+    purls:
+      - pkg:golang/github.com/klauspost/compress@v1.18.6
+    statement: >-
+      Low risk in Betterleaks v1.10.1: the overflow is in s2.NewDict() with an attacker-supplied
+      dictionary; s2.NewDict is not linked (only s2.(*Dict) methods are) and Betterleaks never
+      takes a dictionary from scanned input. Worst case crashes a local scan.
+      Waiting for a Betterleaks release
+    expired_at: 2027-01-31
+  - id: CVE-2026-56854
+    paths:
+      - usr/local/bin/betterleaks
+    purls:
+      - pkg:golang/golang.org/x/crypto@v0.53.0
+    statement: >-
+      Not reachable in Betterleaks v1.10.1: the flaw is in x/crypto/ssh server authentication,
+      and golang.org/x/crypto/ssh is not linked into the binary at all.
+      Waiting for a Betterleaks release
+    expired_at: 2027-01-31
+  - id: CVE-2026-56851
+    paths:
+      - usr/local/bin/betterleaks
+    purls:
+      - pkg:golang/golang.org/x/text@v0.39.0
+    statement: >-
+      Not reachable in Betterleaks v1.10.1: the panic is in the x/text/secure/precis Nickname
+      profile, and golang.org/x/text/secure/precis is not linked into the binary.
+      Waiting for a Betterleaks release
+    expired_at: 2027-01-31

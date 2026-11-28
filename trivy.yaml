@@ -1,0 +1,19 @@
+# Default Trivy settings for this repository: the vulnerability gate shared by local runs and CI.
+# Trivy loads ./trivy.yaml automatically, so from the repository root
+#   trivy image futureys/claude-code-python-development:development
+# runs the same check as the gate step in .github/workflows/trivy.yml.
+# - Config file - Trivy
+#   https://trivy.dev/latest/docs/references/configuration/config-file/
+severity:
+  - HIGH
+  - CRITICAL
+# Fail on any finding left after the filters below.
+exit-code: 1
+# Temporarily accepted findings; see the comment at the top of that file.
+ignorefile: .trivyignore.yaml
+scan:
+  scanners:
+    - vuln
+vulnerability:
+  # A finding with no fixed version gives nothing to act on, so it should not fail the gate.
+  ignore-unfixed: true

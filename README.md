@@ -21,7 +21,7 @@ This repository builds the following images from a single `Dockerfile`, switchin
 | [futureys/claude-code-python-development](https://hub.docker.com/r/futureys/claude-code-python-development) | [ghcr.io/astral-sh/uv](https://github.com/astral-sh/uv/pkgs/container/uv) (Debian) |
 | [futureys/claude-code-playwright-python](https://hub.docker.com/r/futureys/claude-code-playwright-python) | [mcr.microsoft.com/playwright/python](https://mcr.microsoft.com/en-us/artifact/mar/playwright/python/tags) (Ubuntu) |
 
-The Playwright image delegates installing browsers and their OS dependencies to the official Playwright image. Every other tool (Claude Code, uv, GitHub CLI, git-secrets, Gitleaks, gcloud, gws) and its version is shared by both images through `compose.yaml`.
+The Playwright image delegates installing browsers and their OS dependencies to the official Playwright image. Every other tool (Claude Code, uv, GitHub CLI, git-secrets, Betterleaks, gcloud, gws) and its version is shared by both images through `compose.yaml`.
 
 # License
 
