@@ -56,6 +56,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     procps \
     # To install GitHub CLI, git-secrets and Betterleaks
     wget \
+    # Already in the base image; listed only to upgrade it (with any dependencies it needs) to
+    # the security fix for CVE-2026-124851 (1.5.7+dfsg-1+deb13u1 on Debian trixie) ahead of a
+    # base image rebuild, without running a full `apt-get upgrade`. Remove once the base image
+    # ships the fixed version.
+    libzstd1 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 # Force the Claude Code sandbox on for every session in this container:
