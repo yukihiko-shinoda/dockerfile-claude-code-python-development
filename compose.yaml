@@ -1,36 +1,53 @@
+# Versions shared by every image variant; each service only adds its own BASE_IMAGE.
+x-build-args: &build-args
+  # - Commits · yukihiko-shinoda/claude-code-settings-file
+  #   https://github.com/yukihiko-shinoda/claude-code-settings-file/commits/main/
+  VERSION_MANAGED_SETTINGS_JSON: 97893b1d64c14be2ee757ccddf72a5c24f939108
+  # - uv versions · astral-sh
+  #   https://github.com/astral-sh/uv/pkgs/container/uv/versions?filters%5Bversion_type%5D=tagged
+  DOCKER_IMAGE_TAG_UV: 0.13.10-trixie-slim
+  # - @anthropic-ai/claude-code - npm
+  #   https://www.npmjs.com/package/@anthropic-ai/claude-code?activeTab=versions
+  VERSION_CLAUDE_CODE: 2.1.326
+  # - Tags · awslabs/git-secrets
+  #   https://github.com/awslabs/git-secrets/tags
+  VERSION_GIT_SECRETS: 1.3.0
+  # - Releases · gitleaks/gitleaks
+  #   https://github.com/gitleaks/gitleaks/releases
+  VERSION_GITLEAKS: 8.30.1
+  # - Cloud SDK release notes  |  Google Cloud CLI Documentation
+  #   https://cloud.google.com/sdk/docs/release-notes
+  GCLOUD_VERSION: 594.0.1
+  # - Releases · googleworkspace/cli
+  #   https://github.com/googleworkspace/cli/releases
+  GWS_VERSION: 0.22.5
+x-volumes: &volumes
+  - .:/workspace
+  - /workspace/.venv
+  # - Using uv in Docker | uv
+  #   https://docs.astral.sh/uv/guides/integration/docker/#caching
+  - uv-cache:/root/.cache/uv
 services:
   claude-code-python:
     build:
       args:
-        # - Commits · yukihiko-shinoda/claude-code-settings-file
-        #   https://github.com/yukihiko-shinoda/claude-code-settings-file/commits/main/
-        VERSION_MANAGED_SETTINGS_JSON: 97893b1d64c14be2ee757ccddf72a5c24f939108
-        # - uv versions · astral-sh
-        #   https://github.com/astral-sh/uv/pkgs/container/uv/versions?filters%5Bversion_type%5D=tagged
-        DOCKER_IMAGE_TAG_UV: 0.13.10-trixie-slim
-        # - @anthropic-ai/claude-code - npm
-        #   https://www.npmjs.com/package/@anthropic-ai/claude-code?activeTab=versions
-        VERSION_CLAUDE_CODE: 2.1.326
-        # - Tags · awslabs/git-secrets
-        #   https://github.com/awslabs/git-secrets/tags
-        VERSION_GIT_SECRETS: 1.3.0
-        # - Releases · gitleaks/gitleaks
-        #   https://github.com/gitleaks/gitleaks/releases
-        VERSION_GITLEAKS: 8.30.1
-        # - Cloud SDK release notes  |  Google Cloud CLI Documentation
-        #   https://cloud.google.com/sdk/docs/release-notes
-        GCLOUD_VERSION: 594.0.1
-        # - Releases · googleworkspace/cli
-        #   https://github.com/googleworkspace/cli/releases
-        GWS_VERSION: 0.22.5
+        <<: *build-args
+        # Keep the tag in sync with DOCKER_IMAGE_TAG_UV above.
+        BASE_IMAGE: ghcr.io/astral-sh/uv:0.13.10-trixie-slim
       context: .
     image: futureys/claude-code-python-development:development
     user: root
-    volumes:
-      - .:/workspace
-      - /workspace/.venv
-      # - Using uv in Docker | uv
-      #   https://docs.astral.sh/uv/guides/integration/docker/#caching
-      - uv-cache:/root/.cache/uv
+    volumes: *volumes
+  claude-code-playwright-python:
+    build:
+      args:
+        <<: *build-args
+        # - Microsoft Artifact Registry
+        #   https://mcr.microsoft.com/en-us/artifact/mar/playwright/python/tags
+        BASE_IMAGE: mcr.microsoft.com/playwright/python:v1.65.2-resolute
+      context: .
+    image: futureys/claude-code-playwright-python:development
+    user: root
+    volumes: *volumes
 volumes:
   uv-cache:

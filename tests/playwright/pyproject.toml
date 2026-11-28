@@ -1,0 +1,5 @@
+# For testing futureys/claude-code-playwright-python
+[project]
+name = "claude-code-playwright-python"
+version = "0.1.0"
+dependencies = ["pytest-playwright"]

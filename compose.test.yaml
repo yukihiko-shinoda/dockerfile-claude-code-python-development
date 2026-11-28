@@ -4,3 +4,13 @@ services:
       - bash
       - -c
       - uv run hello_world.py && claude --version
+  claude-code-playwright-python:
+    command:
+      - bash
+      - -c
+      # `playwright install` covers the case that the Playwright resolved by uv is newer than
+      # the browsers bundled in the official base image.
+      - >-
+        uv run --directory tests/playwright playwright install chromium
+        && uv run --directory tests/playwright pytest
+        && claude --version

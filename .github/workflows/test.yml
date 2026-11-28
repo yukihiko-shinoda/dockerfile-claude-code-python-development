@@ -26,3 +26,4 @@ jobs:
           targets: app-release
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - run: docker compose -f compose.yaml -f compose.test.yaml run --rm claude-code-python
+      - run: docker compose -f compose.yaml -f compose.test.yaml run --rm claude-code-playwright-python
