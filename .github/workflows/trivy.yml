@@ -1,0 +1,60 @@
+name: Trivy
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  # Catches CVEs disclosed after the last push, while no Dependabot PR touches the images.
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required to upload SARIF results to the Security tab (Code scanning).
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: claude-code-python
+            image: futureys/claude-code-python-development:development
+          - service: claude-code-playwright-python
+            image: futureys/claude-code-playwright-python:development
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      # Scans an image built from the current source rather than the published :latest, so a
+      # PR's changes (e.g. a Dependabot base image bump) are checked before they are released.
+      # Builds for the runner's platform only (linux/amd64) and loads into the local daemon;
+      # the arm64 variant shares the same Dockerfile and base image tags.
+      - run: docker compose build ${{ matrix.service }}
+      # Pinned by SHA: trivy-action's mutable tags were force-pushed in the March 2026 supply chain
+      # incident, so tags alone are not trusted.
+      - name: Scan image for SARIF report
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          limit-severities-for-sarif: true
+      - uses: github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934  # v4.39.5
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.service }}
+      - name: Fail on fixable CRITICAL/HIGH vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+          skip-setup-trivy: true
